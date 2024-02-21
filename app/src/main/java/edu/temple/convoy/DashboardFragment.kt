@@ -4,6 +4,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -11,7 +13,15 @@ import org.json.JSONObject
 
 class DashboardFragment : Fragment() {
 
+    private val AnimOpen: Animation by lazy { AnimationUtils.loadAnimation(context, R.anim.open) }
+    private val AnimClose: Animation by lazy { AnimationUtils.loadAnimation(context, R.anim.close) }
+
+
     lateinit var fab: FloatingActionButton
+    lateinit var menuFAB: FloatingActionButton
+    lateinit var joinFAB: FloatingActionButton
+
+    private var clicked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +39,8 @@ class DashboardFragment : Fragment() {
         val layout =  inflater.inflate(R.layout.fragment_dashboard, container, false)
 
         fab = layout.findViewById(R.id.startFloatingActionButton)
+        joinFAB = layout.findViewById(R.id.joinFloatingActionButton)
+        menuFAB = layout.findViewById(R.id.menuFloatingActionButton)
 
         // Query the server for the current Convoy ID (if available)
         // and use it to close the convoy
@@ -48,10 +60,19 @@ class DashboardFragment : Fragment() {
             true
         }
 
-        layout.findViewById<View>(R.id.startFloatingActionButton)
-            .setOnClickListener{
-                (activity as DashboardInterface).createConvoy()
-            }
+        menuFAB.setOnClickListener{
+            setVisibility(clicked)
+            setAnim(clicked)
+            clicked = !clicked
+        }
+
+        joinFAB.setOnClickListener {
+            (activity as DashboardInterface).joinConvoy()
+        }
+
+        fab.setOnClickListener{
+            (activity as DashboardInterface).createConvoy()
+        }
 
         return layout
     }
@@ -93,8 +114,31 @@ class DashboardFragment : Fragment() {
         return false
     }
 
+    private fun setVisibility(clicked: Boolean){
+        if(clicked){
+            fab.visibility = View.VISIBLE
+            joinFAB.visibility = View.VISIBLE
+        } else{
+            fab.visibility = View.INVISIBLE
+            joinFAB.visibility = View.INVISIBLE
+
+        }
+    }
+
+    private fun setAnim(clicked: Boolean){
+        if(clicked){
+            fab.startAnimation(AnimOpen)
+            joinFAB.startAnimation(AnimOpen)
+        } else{
+            fab.startAnimation(AnimClose)
+            joinFAB.startAnimation(AnimClose)
+
+        }
+    }
     interface DashboardInterface {
         fun createConvoy()
+        fun joinConvoy()
+        fun leaveConvoy()
         fun endConvoy()
         fun logout()
     }

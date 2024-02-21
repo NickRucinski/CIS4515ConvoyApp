@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -93,6 +95,53 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
                 ).show()
             }
         }
+    }
+
+    override fun joinConvoy() {
+        Helper.api.leaveConvoy(
+            this,
+            Helper.user.get(this),
+            Helper.user.getSessionKey(this)!!,
+            "1"
+        ) { response ->
+            if (Helper.api.isSuccess(response)) {
+                convoyViewModel.setConvoyId(response.getString("convoy_id"))
+                Helper.user.saveConvoyId(this@MainActivity, convoyViewModel.getConvoyId().value!!)
+                startLocationService()
+            } else {
+                Toast.makeText(
+                    this@MainActivity,
+                    Helper.api.getErrorMessage(response),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    override fun leaveConvoy() {
+        AlertDialog.Builder(this).setTitle("Leave Convoy")
+            .setMessage("Are you sure you want to leave the convoy?")
+            .setPositiveButton("Yes"
+            ) { _, _ -> Helper.api.leaveConvoy(
+                this,
+                Helper.user.get(this),
+                Helper.user.getSessionKey(this)!!,
+                "1"
+            ) { response ->
+                if (Helper.api.isSuccess(response)) {
+                    convoyViewModel.setConvoyId("")
+                    Helper.user.clearConvoyId(this@MainActivity)
+                    stopLocationService()
+                } else
+                    Toast.makeText(
+                        this@MainActivity,
+                        Helper.api.getErrorMessage(response),
+                        Toast.LENGTH_SHORT
+                    ).show()
+            }
+            }
+            .setNegativeButton("Cancel") { p0, _ -> p0.cancel() }
+            .show()
     }
 
     override fun endConvoy() {
