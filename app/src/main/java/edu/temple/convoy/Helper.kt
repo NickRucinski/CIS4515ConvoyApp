@@ -55,6 +55,26 @@ class Helper {
             makeRequest(context, ENDPOINT_CONVOY, params, response)
         }
 
+        fun joinConvoy(context: Context, user: User, sessionKey: String, convoyId: String, response: Response?) {
+            val params = mutableMapOf(
+                Pair("action", "JOIN"),
+                Pair("username", user.username),
+                Pair("session_key", sessionKey),
+                Pair("convoy_id", convoyId)
+            )
+            makeRequest(context, ENDPOINT_CONVOY, params, response)
+        }
+
+        fun leaveConvoy(context: Context, user: User, sessionKey: String, convoyId: String, response: Response?) {
+            val params = mutableMapOf(
+                Pair("action", "LEAVE"),
+                Pair("username", user.username),
+                Pair("session_key", sessionKey),
+                Pair("convoy_id", convoyId)
+            )
+            makeRequest(context, ENDPOINT_CONVOY, params, response)
+        }
+
         fun closeConvoy(context: Context, user: User, sessionKey: String, convoyId: String, response: Response?) {
             val params = mutableMapOf(
                 Pair("action", "END"),
