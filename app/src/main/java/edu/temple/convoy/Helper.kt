@@ -57,7 +57,7 @@ class Helper {
 
         fun closeConvoy(context: Context, user: User, sessionKey: String, convoyId: String, response: Response?) {
             val params = mutableMapOf(
-                Pair("action", "CLOSE"),
+                Pair("action", "END"),
                 Pair("username", user.username),
                 Pair("session_key", sessionKey),
                 Pair("convoy_id", convoyId)
