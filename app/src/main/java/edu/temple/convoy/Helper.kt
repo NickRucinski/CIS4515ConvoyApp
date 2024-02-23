@@ -123,6 +123,7 @@ class Helper {
         private val KEY_FIRSTNAME = "firstname"
         private val KEY_LASTNAME = "lastname"
         private val KEY_CONVOY_ID = "convoy_id"
+        private val KEY_FCM_TOKEN = "fcm_token"
 
         fun saveSessionData(context: Context, sessionKey: String) {
             getSP(context).edit()
@@ -136,8 +137,18 @@ class Helper {
                 .apply()
         }
 
+        fun saveFCMToken(context: Context, groupId: String) {
+            getSP(context).edit()
+                .putString(KEY_FCM_TOKEN, groupId)
+                .apply()
+        }
+
         fun getConvoyId(context: Context): String? {
             return getSP(context).getString(KEY_CONVOY_ID, null)
+        }
+
+        fun getFCMToken(context: Context): String? {
+            return getSP(context).getString(KEY_FCM_TOKEN, null)
         }
 
         fun clearConvoyId(context: Context) {
