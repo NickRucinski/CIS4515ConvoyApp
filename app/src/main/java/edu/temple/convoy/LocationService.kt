@@ -49,6 +49,16 @@ class LocationService : Service() {
                 val msg: Message = Message.obtain()
                 msg.obj = LatLng(location.latitude, location.longitude)
                 handler!!.sendMessage(msg)
+                Helper.api.updateUserLocation(
+                    this,
+                    Helper.user.get(this),
+                    Helper.user.getSessionKey(this)!!,
+                    location.latitude.toString(),
+                    location.longitude.toString()
+                ){
+                    Log.d("User Update Response",it.toString())
+                }
+
             }
         }
 

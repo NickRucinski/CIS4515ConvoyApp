@@ -3,6 +3,7 @@ package edu.temple.convoy
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -29,6 +30,17 @@ class DashboardFragment : Fragment() {
         // Let the system know that this fragment
         // wants to contribute to the app menu
         setHasOptionsMenu(true)
+
+        Helper.user.getSessionKey(requireContext())?.run {
+            Helper.api.updateFCMToken(
+                requireContext(),
+                Helper.user.get(requireContext()),
+                this,
+                Helper.user.getFCMToken(requireContext())!!
+            ){
+                Log.d("Sent Token", it.toString())
+            }
+        }
     }
 
     override fun onCreateView(
@@ -85,32 +97,30 @@ class DashboardFragment : Fragment() {
         // Change FloatingActionButton behavior depending on if we're
         // currently in a convoy
         val viewmodel = ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java)
-            viewmodel.getConvoyId().observe(requireActivity()) { convoyID ->
-                viewmodel.getUserJoinedConvoy().observe(requireActivity()){joined ->
-                    if(!joined){
-                        if (convoyID.isNullOrEmpty()) {
-                            fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
-                            fab.setImageResource(android.R.drawable.ic_input_add)
-                            fab.setOnClickListener {(activity as DashboardInterface).createConvoy()}
-                        } else {
-                            fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
-                            fab.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-                            fab.setOnClickListener {(activity as DashboardInterface).endConvoy()}
-                        }
-                    } else{
-                        if (convoyID.isNullOrEmpty()) {
-                            joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
-                            joinFAB.setImageResource(R.drawable.join_24px)
-                            joinFAB.setOnClickListener {(activity as DashboardInterface).joinConvoy()}
-                        } else {
-                            joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
-                            joinFAB.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-                            joinFAB.setOnClickListener {(activity as DashboardInterface).leaveConvoy()}
-                        }
+        viewmodel.getConvoyId().observe(requireActivity()) { convoyID ->
+            viewmodel.getUserJoinedConvoy().observe(requireActivity()){joined ->
+                if(!joined){
+                    if (convoyID.isNullOrEmpty()) {
+                        fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
+                        fab.setImageResource(android.R.drawable.ic_input_add)
+                        fab.setOnClickListener {(activity as DashboardInterface).createConvoy()}
+                    } else {
+                        fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
+                        fab.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                        fab.setOnClickListener {(activity as DashboardInterface).endConvoy()}
+                    }
+                } else{
+                    if (convoyID.isNullOrEmpty()) {
+                        joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
+                        joinFAB.setImageResource(R.drawable.join_24px)
+                        joinFAB.setOnClickListener {(activity as DashboardInterface).joinConvoy()}
+                    } else {
+                        joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
+                        joinFAB.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                        joinFAB.setOnClickListener {(activity as DashboardInterface).leaveConvoy()}
                     }
                 }
-
-
+            }
 
         }
     }

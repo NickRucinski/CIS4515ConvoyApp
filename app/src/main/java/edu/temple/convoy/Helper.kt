@@ -1,5 +1,6 @@
 package edu.temple.convoy
 
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
@@ -94,6 +95,27 @@ class Helper {
             makeRequest(context, ENDPOINT_CONVOY, params, response)
         }
 
+        fun updateFCMToken(context: Context, user:User, sessionKey: String, fcmToken: String, response: Response?) {
+            val params = mutableMapOf(
+                Pair("action", "UPDATE"),
+                Pair("username", user.username),
+                Pair("session_key", sessionKey),
+                Pair("fcm_token", fcmToken),
+            )
+            makeRequest(context, ENDPOINT_CONVOY, params, response)
+        }
+
+        fun updateUserLocation(context: Context, user:User, sessionKey: String, lat: String, long: String, response: Response?) {
+            val params = mutableMapOf(
+                Pair("action", "UPDATE"),
+                Pair("username", user.username),
+                Pair("session_key", sessionKey),
+                Pair("latitude", lat),
+                Pair("longitude", long),
+            )
+            makeRequest(context, ENDPOINT_CONVOY, params, response)
+        }
+
         private fun makeRequest(context: Context, endPoint: String, params: MutableMap<String, String>, responseCallback: Response?) {
             Volley.newRequestQueue(context)
                 .add(object: StringRequest(Request.Method.POST, API_BASE + endPoint, {
@@ -137,9 +159,9 @@ class Helper {
                 .apply()
         }
 
-        fun saveFCMToken(context: Context, groupId: String) {
+        fun saveFCMToken(context: Context, token: String) {
             getSP(context).edit()
-                .putString(KEY_FCM_TOKEN, groupId)
+                .putString(KEY_FCM_TOKEN, token)
                 .apply()
         }
 
@@ -185,5 +207,23 @@ class Helper {
         }
     }
 
+
+}
+
+class FirebaseCallbackHelper : Application() {
+
+    var messageCallback: FirebaseCallback? = null
+
+    interface FirebaseCallback {
+        fun messageReceived(message: String)
+    }
+
+    fun registerCallback (callback: FirebaseCallback?) {
+        messageCallback = callback
+    }
+
+    fun getCallBack () : FirebaseCallback? {
+        return messageCallback
+    }
 
 }
