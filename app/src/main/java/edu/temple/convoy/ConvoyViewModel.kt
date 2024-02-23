@@ -16,12 +16,20 @@ class ConvoyViewModel : ViewModel() {
         MutableLiveData<String>()
     }
 
+    private val userJoinedConvoy by lazy {
+        MutableLiveData<Boolean>()
+    }
+
     fun setConvoyId(id: String) {
         convoyId.value = id
     }
 
     fun setLocation(latLng: LatLng) {
         location.value = latLng
+    }
+
+    fun setUserJoinedConvoy(joined: Boolean){
+        userJoinedConvoy.value = joined
     }
 
     fun getLocation(): LiveData<LatLng> {
@@ -32,4 +40,7 @@ class ConvoyViewModel : ViewModel() {
         return convoyId
     }
 
+    fun getUserJoinedConvoy(): LiveData<Boolean>{
+        return userJoinedConvoy
+    }
 }
