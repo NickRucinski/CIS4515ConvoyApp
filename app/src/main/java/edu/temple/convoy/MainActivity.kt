@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.FirebaseApp
 
 class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
 
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        FirebaseApp.initializeApp(this)
         createNotificationChannel()
         serviceIntent = Intent(this, LocationService::class.java)
 
@@ -93,6 +95,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
         ) { response ->
             if (Helper.api.isSuccess(response)) {
                 convoyViewModel.setConvoyId(response.getString("convoy_id"))
+                convoyViewModel.setUserJoinedConvoy(false)
                 Helper.user.saveConvoyId(this@MainActivity, convoyViewModel.getConvoyId().value!!)
                 startLocationService()
             } else {
@@ -119,6 +122,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
             ) { response ->
                 if (Helper.api.isSuccess(response)) {
                     convoyViewModel.setConvoyId(editText.text.toString())
+                    convoyViewModel.setUserJoinedConvoy(true)
                     Helper.user.saveConvoyId(this@MainActivity, convoyViewModel.getConvoyId().value!!)
                     startLocationService()
                 } else {
@@ -135,6 +139,13 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
     }
 
     override fun leaveConvoy() {
+        if(ViewModelProvider(this).get(ConvoyViewModel::class.java).getUserJoinedConvoy().value == false){
+            Toast.makeText(
+                this@MainActivity,
+                "You are the host. Please use the end button.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         AlertDialog.Builder(this).setTitle("Leave Convoy")
             .setMessage("Are you sure you want to leave the convoy?")
             .setPositiveButton("Yes"
@@ -161,6 +172,13 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
     }
 
     override fun endConvoy() {
+        if(ViewModelProvider(this).get(ConvoyViewModel::class.java).getUserJoinedConvoy().value == true){
+            Toast.makeText(
+                this@MainActivity,
+                "You are not the host. Please use the leave button.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         AlertDialog.Builder(this).setTitle("Close Convoy")
             .setMessage("Are you sure you want to close the convoy?")
             .setPositiveButton("Yes"

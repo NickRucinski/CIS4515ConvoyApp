@@ -7,12 +7,16 @@ import android.util.Log
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import org.json.JSONObject
 
-class DashboardFragment : Fragment() {
+class DashboardFragment : Fragment(), FirebaseCallbackHelper.FirebaseCallback {
 
     private val AnimOpen: Animation by lazy { AnimationUtils.loadAnimation(context, R.anim.open) }
     private val AnimClose: Animation by lazy { AnimationUtils.loadAnimation(context, R.anim.close) }
@@ -31,12 +35,18 @@ class DashboardFragment : Fragment() {
         // wants to contribute to the app menu
         setHasOptionsMenu(true)
 
-        Helper.user.getSessionKey(requireContext())?.run {
+        FirebaseMessaging.getInstance()
+            .token.addOnSuccessListener {
+                Log.d("Firebase", it)
+            }
+
+
+        Helper.user.getFCMToken(requireContext())?.run {
             Helper.api.updateFCMToken(
                 requireContext(),
                 Helper.user.get(requireContext()),
-                this,
-                Helper.user.getFCMToken(requireContext())!!
+                Helper.user.getSessionKey(requireContext())!!,
+                this
             ){
                 Log.d("Sent Token", it.toString())
             }
@@ -168,6 +178,15 @@ class DashboardFragment : Fragment() {
         fun leaveConvoy()
         fun endConvoy()
         fun logout()
+    }
+
+    override fun messageReceived(message: String) {
+        Log.d("Got a message", message)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (activity?.application as FirebaseCallbackHelper).registerCallback(null)
     }
 
 }

@@ -27,9 +27,6 @@ class FirebaseService : FirebaseMessagingService(){
         super.onMessageReceived(message)
         val myMessage = message.data.get("payload").toString()
 
-
-        (application as FirebaseCallbackHelper).getCallBack()?.run {
-            messageReceived(myMessage)
-        }
+        Log.d("Firebase", myMessage)
     }
 }
