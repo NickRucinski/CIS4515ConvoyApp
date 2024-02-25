@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.lifecycle.ViewModelProvider
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -106,11 +105,12 @@ class Helper {
             makeRequest(context, ENDPOINT_USER, params, response)
         }
 
-        fun updateUserLocation(context: Context, user:User, sessionKey: String, lat: String, long: String, response: Response?) {
+        fun updateUserLocation(context: Context, user:User, sessionKey: String, convoyId: String, lat: String, long: String, response: Response?) {
             val params = mutableMapOf(
                 Pair("action", "UPDATE"),
                 Pair("username", user.username),
                 Pair("session_key", sessionKey),
+                Pair("convoy_id", convoyId),
                 Pair("latitude", lat),
                 Pair("longitude", long),
             )
@@ -208,23 +208,5 @@ class Helper {
         }
     }
 
-
-}
-
-class FirebaseCallbackHelper : Application() {
-
-    var messageCallback: FirebaseCallback? = null
-
-    interface FirebaseCallback {
-        fun messageReceived(message: String)
-    }
-
-    fun registerCallback (callback: FirebaseCallback?) {
-        messageCallback = callback
-    }
-
-    fun getCallBack () : FirebaseCallback? {
-        return messageCallback
-    }
 
 }

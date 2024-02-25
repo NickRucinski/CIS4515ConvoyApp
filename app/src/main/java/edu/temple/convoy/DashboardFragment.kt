@@ -16,7 +16,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import org.json.JSONObject
 
-class DashboardFragment : Fragment(), FirebaseCallbackHelper.FirebaseCallback {
+class DashboardFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
     private val AnimOpen: Animation by lazy { AnimationUtils.loadAnimation(context, R.anim.open) }
     private val AnimClose: Animation by lazy { AnimationUtils.loadAnimation(context, R.anim.close) }
@@ -180,13 +180,14 @@ class DashboardFragment : Fragment(), FirebaseCallbackHelper.FirebaseCallback {
         fun logout()
     }
 
-    override fun messageReceived(message: String) {
-        Log.d("Got a message", message)
-    }
 
     override fun onDestroy() {
         super.onDestroy()
-        (activity?.application as FirebaseCallbackHelper).registerCallback(null)
+    }
+
+    override fun messageReceived(message: JSONObject) {
+        Log.d("Got a message", message.toString())
+
     }
 
 }

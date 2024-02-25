@@ -1,6 +1,7 @@
 package edu.temple.convoy
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,17 +11,24 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import org.json.JSONObject
 
 
-class MapsFragment : Fragment() {
+class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
     lateinit var map: GoogleMap
     var myMarker: Marker? = null
 
     private val callback = OnMapReadyCallback { googleMap ->
         map = googleMap
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        (requireActivity().application as FCMCallbackHelper).registerCallback(this)
     }
 
     override fun onCreateView(
@@ -45,5 +53,31 @@ class MapsFragment : Fragment() {
                 ) else myMarker?.setPosition(it)
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 17f))
             }
+    }
+
+    override fun messageReceived(message: JSONObject) {
+        if(message.getString("action") == "UPDATE"){
+            val data = message.getJSONArray("data")
+            Log.d("Firebase", data[0].toString())
+            if(data.length() > 0){
+                for(i in 0 until data.length()){
+                    var groupMember = data[i] as JSONObject
+                    if(groupMember.getString("username") != Helper.user.get(requireContext()).username){
+                        val memberLatLng =
+                            LatLng(groupMember.getString("latitude").toDouble(),
+                                groupMember.getString("longitude").toDouble()
+                            )
+                        map.addMarker(
+                            MarkerOptions().position(memberLatLng)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (requireActivity().application as FCMCallbackHelper).registerCallback(null)
     }
 }

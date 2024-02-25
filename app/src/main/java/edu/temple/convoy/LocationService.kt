@@ -53,6 +53,7 @@ class LocationService : Service() {
                     this,
                     Helper.user.get(this),
                     Helper.user.getSessionKey(this)!!,
+                    Helper.user.getConvoyId(this)!!,
                     location.latitude.toString(),
                     location.longitude.toString()
                 ){

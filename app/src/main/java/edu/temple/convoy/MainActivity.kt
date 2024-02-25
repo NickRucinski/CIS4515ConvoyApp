@@ -9,8 +9,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.*
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,8 +16,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.FirebaseApp
+import org.json.JSONObject
 
-class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
+class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, FCMCallbackHelper.FCMCallback{
 
     var serviceIntent: Intent? = null
     val convoyViewModel : ConvoyViewModel by lazy {
@@ -48,6 +47,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
         setContentView(R.layout.activity_main)
 
         FirebaseApp.initializeApp(this)
+        (application as FCMCallbackHelper).registerCallback(this)
         createNotificationChannel()
         serviceIntent = Intent(this, LocationService::class.java)
 
@@ -218,4 +218,16 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface {
         unbindService(serviceConnection)
         stopService(serviceIntent)
     }
+
+    override fun messageReceived(message: JSONObject) {
+        if(message.getString("action") == "END"){
+            // Leave the convoy
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (application as FCMCallbackHelper).registerCallback(null)
+    }
+
 }
