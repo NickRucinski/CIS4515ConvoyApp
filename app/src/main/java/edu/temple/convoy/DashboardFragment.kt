@@ -26,7 +26,7 @@ class DashboardFragment : Fragment(), FCMCallbackHelper.FCMCallback {
     lateinit var menuFAB: FloatingActionButton
     lateinit var joinFAB: FloatingActionButton
 
-    private var clicked = false
+    private var clicked = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,16 +119,15 @@ class DashboardFragment : Fragment(), FCMCallbackHelper.FCMCallback {
                         fab.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
                         fab.setOnClickListener {(activity as DashboardInterface).endConvoy()}
                     }
-                } else{
-                    if (convoyID.isNullOrEmpty()) {
-                        joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
-                        joinFAB.setImageResource(R.drawable.join_24px)
-                        joinFAB.setOnClickListener {(activity as DashboardInterface).joinConvoy()}
-                    } else {
-                        joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
-                        joinFAB.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-                        joinFAB.setOnClickListener {(activity as DashboardInterface).leaveConvoy()}
-                    }
+                }
+                if (convoyID.isNullOrEmpty()) {
+                    joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
+                    joinFAB.setImageResource(R.drawable.join_24px)
+                    joinFAB.setOnClickListener {(activity as DashboardInterface).joinConvoy()}
+                } else {
+                    joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
+                    joinFAB.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                    joinFAB.setOnClickListener {(activity as DashboardInterface).leaveConvoy()}
                 }
             }
 

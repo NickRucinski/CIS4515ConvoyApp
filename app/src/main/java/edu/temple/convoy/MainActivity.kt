@@ -62,6 +62,9 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
             convoyViewModel.setConvoyId(this)
             startLocationService()
         }
+        Helper.user.getJoinedState(this).run {
+            convoyViewModel.setUserJoinedConvoy(this)
+        }
 
         if (checkSelfPermission(
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -97,6 +100,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                 convoyViewModel.setConvoyId(response.getString("convoy_id"))
                 convoyViewModel.setUserJoinedConvoy(false)
                 Helper.user.saveConvoyId(this@MainActivity, convoyViewModel.getConvoyId().value!!)
+                Helper.user.saveJoinedState(this@MainActivity, false)
                 startLocationService()
             } else {
                 Toast.makeText(
@@ -124,6 +128,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                     convoyViewModel.setConvoyId(editText.text.toString())
                     convoyViewModel.setUserJoinedConvoy(true)
                     Helper.user.saveConvoyId(this@MainActivity, convoyViewModel.getConvoyId().value!!)
+                    Helper.user.saveJoinedState(this@MainActivity, false)
                     startLocationService()
                 } else {
                     Toast.makeText(
@@ -153,11 +158,13 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                 this,
                 Helper.user.get(this),
                 Helper.user.getSessionKey(this)!!,
-                "1"
+                Helper.user.getConvoyId(this)!!
             ) { response ->
                 if (Helper.api.isSuccess(response)) {
                     convoyViewModel.setConvoyId("")
+                    convoyViewModel.setUserJoinedConvoy(false)
                     Helper.user.clearConvoyId(this@MainActivity)
+                    Helper.user.clearJoinedState(this@MainActivity)
                     stopLocationService()
                 } else
                     Toast.makeText(
@@ -191,6 +198,8 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                 if (Helper.api.isSuccess(response)) {
                     convoyViewModel.setConvoyId("")
                     Helper.user.clearConvoyId(this@MainActivity)
+                    Helper.user.clearJoinedState(this@MainActivity)
+
                     stopLocationService()
                 } else
                     Toast.makeText(
@@ -221,7 +230,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
 
     override fun messageReceived(message: JSONObject) {
         if(message.getString("action") == "END"){
-            // Leave the convoy
+            leaveConvoy()
         }
     }
 

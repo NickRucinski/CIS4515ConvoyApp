@@ -147,6 +147,7 @@ class Helper {
         private val KEY_LASTNAME = "lastname"
         private val KEY_CONVOY_ID = "convoy_id"
         private val KEY_FCM_TOKEN = "fcm_token"
+        private val KEY_JOINED = "joined"
 
         fun saveSessionData(context: Context, sessionKey: String) {
             getSP(context).edit()
@@ -160,6 +161,12 @@ class Helper {
                 .apply()
         }
 
+        fun saveJoinedState(context: Context, joined: Boolean){
+            getSP(context).edit()
+                .putBoolean(KEY_JOINED, joined)
+                .apply()
+        }
+
         fun saveFCMToken(context: Context, token: String) {
             getSP(context).edit()
                 .putString(KEY_FCM_TOKEN, token)
@@ -170,12 +177,21 @@ class Helper {
             return getSP(context).getString(KEY_CONVOY_ID, null)
         }
 
+        fun getJoinedState(context: Context): Boolean {
+            return getSP(context).getBoolean(KEY_JOINED, false)
+        }
+
         fun getFCMToken(context: Context): String? {
             return getSP(context).getString(KEY_FCM_TOKEN, null)
         }
 
         fun clearConvoyId(context: Context) {
             getSP(context).edit().remove(KEY_CONVOY_ID)
+                .apply()
+        }
+
+        fun clearJoinedState(context: Context){
+            getSP(context).edit().remove(KEY_JOINED)
                 .apply()
         }
 
