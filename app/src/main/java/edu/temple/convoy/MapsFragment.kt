@@ -21,6 +21,7 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
     lateinit var map: GoogleMap
     var myMarker: Marker? = null
+    var currentMarkers = emptyArray<Marker?>()
 
     private val callback = OnMapReadyCallback { googleMap ->
         map = googleMap
@@ -58,21 +59,34 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
     override fun messageReceived(message: JSONObject) {
         if(message.getString("action") == "UPDATE"){
             val data = message.getJSONArray("data")
+            val markers = mutableListOf<Marker>()
+
             Log.d("Firebase", data[0].toString())
+
             if(data.length() > 0){
                 for(i in 0 until data.length()){
-                    var groupMember = data[i] as JSONObject
+                    val groupMember = data[i] as JSONObject
                     if(groupMember.getString("username") != Helper.user.get(requireContext()).username){
                         val memberLatLng =
-                            LatLng(groupMember.getString("latitude").toDouble(),
+                            LatLng(
+                                groupMember.getString("latitude").toDouble(),
                                 groupMember.getString("longitude").toDouble()
                             )
-                        map.addMarker(
+                        //need to make a way to remove markers when someone leaves
+                        val marker = map.addMarker(
                             MarkerOptions().position(memberLatLng)
-                        )
+                        )!!
+                        markers.add(marker)
                     }
                 }
             }
+
+            currentMarkers.filterNot {
+                markers.contains(it)
+            }.forEach{
+                it?.remove()
+            }
+            currentMarkers = markers.toTypedArray()
         }
     }
 
