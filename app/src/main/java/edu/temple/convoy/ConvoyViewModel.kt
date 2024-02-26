@@ -1,5 +1,6 @@
 package edu.temple.convoy
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +18,7 @@ class ConvoyViewModel : ViewModel() {
     }
 
     private val userJoinedConvoy by lazy {
-        MutableLiveData<Boolean>()
+        MutableLiveData<Boolean?>()
     }
 
     fun setConvoyId(id: String) {
@@ -28,7 +29,8 @@ class ConvoyViewModel : ViewModel() {
         location.value = latLng
     }
 
-    fun setUserJoinedConvoy(joined: Boolean){
+    fun setUserJoinedConvoy(joined: Boolean?){
+        Log.d("Joined","joined is now $joined")
         userJoinedConvoy.value = joined
     }
 
@@ -40,7 +42,18 @@ class ConvoyViewModel : ViewModel() {
         return convoyId
     }
 
-    fun getUserJoinedConvoy(): LiveData<Boolean>{
+    fun getUserJoinedConvoy(): LiveData<Boolean?>{
         return userJoinedConvoy
     }
+
+    fun getConvoyState(): MutableLiveData<ConvoyState>{
+        return MutableLiveData<ConvoyState>().apply {
+            value = ConvoyState(convoyId, userJoinedConvoy)
+        }
+    }
 }
+
+data class ConvoyState(
+    var convoyID: MutableLiveData<String>,
+    var joinedConvoy: MutableLiveData<Boolean?>
+)

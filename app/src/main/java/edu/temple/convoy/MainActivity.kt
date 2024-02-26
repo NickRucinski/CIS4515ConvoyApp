@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
             ) { response ->
                 if (Helper.api.isSuccess(response)) {
                     convoyViewModel.setConvoyId("")
-                    convoyViewModel.setUserJoinedConvoy(false)
+                    convoyViewModel.setUserJoinedConvoy(null)
                     Helper.user.clearConvoyId(this@MainActivity)
                     Helper.user.clearJoinedState(this@MainActivity)
                     stopLocationService()
@@ -197,6 +197,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
             ) { response ->
                 if (Helper.api.isSuccess(response)) {
                     convoyViewModel.setConvoyId("")
+                    convoyViewModel.setUserJoinedConvoy(null)
                     Helper.user.clearConvoyId(this@MainActivity)
                     Helper.user.clearJoinedState(this@MainActivity)
 

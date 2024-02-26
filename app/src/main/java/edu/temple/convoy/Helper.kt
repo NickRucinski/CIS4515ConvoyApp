@@ -161,9 +161,9 @@ class Helper {
                 .apply()
         }
 
-        fun saveJoinedState(context: Context, joined: Boolean){
+        fun saveJoinedState(context: Context, joined: Boolean?){
             getSP(context).edit()
-                .putBoolean(KEY_JOINED, joined)
+                .putString(KEY_JOINED, joined.toString())
                 .apply()
         }
 
@@ -177,8 +177,9 @@ class Helper {
             return getSP(context).getString(KEY_CONVOY_ID, null)
         }
 
-        fun getJoinedState(context: Context): Boolean {
-            return getSP(context).getBoolean(KEY_JOINED, false)
+        fun getJoinedState(context: Context): Boolean? {
+            val stringValue = getSP(context).getString(KEY_JOINED, "null")
+            return if (stringValue == "null") null else stringValue.toBoolean()
         }
 
         fun getFCMToken(context: Context): String? {

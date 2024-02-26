@@ -95,11 +95,11 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
                 }
             }
             // I think this is wrong
-            currentMarkers.filterNot {
-                markers.contains(it)
-            }.forEach{
-                it?.remove()
-            }
+//            currentMarkers.filterNot {
+//                markers.contains(it)
+//            }.forEach{
+//                it?.remove()
+//            }
             markers.add(myMarker)
             currentMarkers = markers
             if(currentMarkers.isNotEmpty()){

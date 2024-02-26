@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.View.OnClickListener
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
@@ -107,30 +108,15 @@ class DashboardFragment : Fragment(), FCMCallbackHelper.FCMCallback {
         // Change FloatingActionButton behavior depending on if we're
         // currently in a convoy
         val viewmodel = ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java)
-        viewmodel.getConvoyId().observe(requireActivity()) { convoyID ->
-            viewmodel.getUserJoinedConvoy().observe(requireActivity()){joined ->
-                if(!joined){
-                    if (convoyID.isNullOrEmpty()) {
-                        fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
-                        fab.setImageResource(android.R.drawable.ic_input_add)
-                        fab.setOnClickListener {(activity as DashboardInterface).createConvoy()}
-                    } else {
-                        fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
-                        fab.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-                        fab.setOnClickListener {(activity as DashboardInterface).endConvoy()}
-                    }
-                }
-                if (convoyID.isNullOrEmpty()) {
-                    joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
-                    joinFAB.setImageResource(R.drawable.join_24px)
-                    joinFAB.setOnClickListener {(activity as DashboardInterface).joinConvoy()}
-                } else {
-                    joinFAB.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
-                    joinFAB.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
-                    joinFAB.setOnClickListener {(activity as DashboardInterface).leaveConvoy()}
-                }
+        viewmodel.getUserJoinedConvoy().observe(requireActivity()) { joinedConvoy ->
+            if(joinedConvoy == false){
+                setButtonRed(fab){(activity as DashboardInterface).endConvoy()}
+            } else if(joinedConvoy == true){
+                setButtonRed(joinFAB){(activity as DashboardInterface).leaveConvoy()}
+            } else{
+                setButtonGreen(fab, android.R.drawable.ic_input_add){(activity as DashboardInterface).createConvoy()}
+                setButtonGreen(joinFAB, R.drawable.join_24px){(activity as DashboardInterface).joinConvoy()}
             }
-
         }
     }
 
@@ -171,6 +157,19 @@ class DashboardFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
         }
     }
+
+    private fun setButtonGreen(fab: FloatingActionButton, resID: Int, action: OnClickListener){
+        fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
+        fab.setImageResource(resID)
+        fab.setOnClickListener(action)
+    }
+
+    private fun setButtonRed(fab: FloatingActionButton, action: OnClickListener){
+        fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
+        fab.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+        fab.setOnClickListener(action)
+    }
+
     interface DashboardInterface {
         fun createConvoy()
         fun joinConvoy()
