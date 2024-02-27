@@ -234,7 +234,25 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
         Log.d("MainActivity Message Receiver", message.toString())
         if(message.getString("action") == "END" && convoyViewModel.getUserJoinedConvoy().value == true){
             runOnUiThread {
-                leaveConvoy()
+                Helper.api.leaveConvoy(
+                    this,
+                    Helper.user.get(this),
+                    Helper.user.getSessionKey(this)!!,
+                    Helper.user.getConvoyId(this)!!
+                ) { response ->
+                    if (Helper.api.isSuccess(response)) {
+                        convoyViewModel.setConvoyId("")
+                        convoyViewModel.setUserJoinedConvoy(null)
+                        Helper.user.clearConvoyId(this@MainActivity)
+                        Helper.user.clearJoinedState(this@MainActivity)
+                        stopLocationService()
+                    } else
+                        Toast.makeText(
+                            this@MainActivity,
+                            Helper.api.getErrorMessage(response),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                }
             }
         }
     }
