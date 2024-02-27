@@ -30,25 +30,37 @@ class FirebaseService : FirebaseMessagingService(){
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         val myMessage= JSONObject(message.data.get("payload")!!)
-
-        (application as FCMCallbackHelper).getCallback()?.run {
+        Log.d("Firebase Message Full", myMessage.toString())
+        (application as FCMCallbackHelper).getMessageCallback()?.run {
+            messageReceived(myMessage)
+        }
+        (application as FCMCallbackHelper).getMapCallbackInternal()?.run {
             messageReceived(myMessage)
         }
     }
 }
 
 class FCMCallbackHelper : Application() {
-    var messageCallback: FCMCallback? = null
+    var messCallback: FCMCallback? = null
+    var mapCallback: FCMCallback? = null
 
     interface FCMCallback {
         fun messageReceived(message: JSONObject)
     }
 
-    fun registerCallback(callback: FCMCallback?){
-        messageCallback = callback
+    fun registerMessageCallback(callback: FCMCallback?){
+        messCallback = callback
     }
 
-    fun getCallback(): FCMCallback?{
-        return messageCallback
+    fun getMessageCallback(): FCMCallback?{
+        return messCallback
+    }
+
+    fun registerMapCallback(callback: FCMCallback?){
+        mapCallback = callback
+    }
+
+    fun getMapCallbackInternal(): FCMCallback?{
+        return mapCallback
     }
 }

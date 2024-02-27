@@ -1,16 +1,21 @@
 package edu.temple.convoy
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
@@ -31,7 +36,7 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (requireActivity().application as FCMCallbackHelper).registerCallback(this)
+        (requireActivity().application as FCMCallbackHelper).registerMapCallback(this)
     }
 
     override fun onCreateView(
@@ -49,18 +54,33 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
 
         // Update location on map whenever ViewModel is updated
-        ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java).getLocation()
+        ViewModelProvider(requireActivity())
+            .get(ConvoyViewModel::class.java)
+            .getLocation()
             .observe(requireActivity()) {
-                if (myMarker == null) {
-                    myMarker = map.addMarker(
-                        MarkerOptions().position(it)
-                    )
-                    currentMarkers.add(myMarker)
-                } else {
-                    myMarker?.setPosition(it)
+                if(map != null){
+                    if (myMarker == null) {
+                        myMarker = map.addMarker(
+                            MarkerOptions().position(it)
+                        )
+                    } else {
+                        myMarker?.setPosition(it)
+                    }
+                    if(currentMarkers.isEmpty()){
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 17f))
+                    }
                 }
-                if(currentMarkers.isEmpty()){
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 17f))
+            }
+
+        ViewModelProvider(requireActivity())
+            .get(ConvoyViewModel::class.java)
+            .getUserJoinedConvoy()
+            .observe(requireActivity()){
+                if(it == null){
+                    for(m in currentMarkers){
+                        m?.remove()
+                    }
+                    myMarker?.remove()
                 }
             }
     }
@@ -76,41 +96,45 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
     }
 
     fun addMemberMarkers(data: JSONArray){
-        val markers = mutableListOf<Marker?>()
 
+        val markers = mutableListOf<Marker?>()
+        val hostUserName = Helper.user.get(requireContext()).username
         if(data.length() > 0){
             for(i in 0 until data.length()){
                 val groupMember = data[i] as JSONObject
-                if(groupMember.getString("username") != Helper.user.get(requireContext()).username){
+                if(groupMember.getString("username") != hostUserName){
                     val memberLatLng =
                         LatLng(
                             groupMember.getString("latitude").toDouble(),
                             groupMember.getString("longitude").toDouble()
                         )
-                    //need to make a way to remove markers when someone leaves
                     val marker = map.addMarker(
-                        MarkerOptions().position(memberLatLng)
+                        MarkerOptions()
+                            .position(memberLatLng)
+                            .title(groupMember.getString("username"))
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.airport_shuttle_fill0_wght400_grad0_opsz24))
                     )!!
                     markers.add(marker)
                 }
             }
-            // I think this is wrong
-//            currentMarkers.filterNot {
-//                markers.contains(it)
-//            }.forEach{
-//                it?.remove()
-//            }
-            markers.add(myMarker)
+            // I think this is wrong not sure though
+            currentMarkers.filterNot {
+                markers.contains(it)
+            }.forEach{
+                it?.remove()
+            }
+//            markers.add(myMarker)
             currentMarkers = markers
             if(currentMarkers.isNotEmpty()){
                 val boundsBuilder = LatLngBounds.Builder()
                 for(marker in currentMarkers){
-                    Log.d("Markers", marker.toString())
+                    Log.d("Markers", marker?.title.toString())
                     boundsBuilder.include(marker!!.position)
                 }
+                boundsBuilder.include(myMarker!!.position)
                 map.animateCamera(
                     CameraUpdateFactory
-                        .newLatLngBounds(boundsBuilder.build(), 200, 200, 25)
+                        .newLatLngBounds(boundsBuilder.build(), 200, 200, 0)
                 )
             }
         }
@@ -118,6 +142,6 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        (requireActivity().application as FCMCallbackHelper).registerCallback(null)
+        (requireActivity().application as FCMCallbackHelper).registerMapCallback(null)
     }
 }

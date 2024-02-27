@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.*
+import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
         setContentView(R.layout.activity_main)
 
         FirebaseApp.initializeApp(this)
-        (application as FCMCallbackHelper).registerCallback(this)
+        (application as FCMCallbackHelper).registerMessageCallback(this)
         createNotificationChannel()
         serviceIntent = Intent(this, LocationService::class.java)
 
@@ -230,14 +231,17 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
     }
 
     override fun messageReceived(message: JSONObject) {
-        if(message.getString("action") == "END"){
-            leaveConvoy()
+        Log.d("MainActivity Message Receiver", message.toString())
+        if(message.getString("action") == "END" && convoyViewModel.getUserJoinedConvoy().value == true){
+            runOnUiThread {
+                leaveConvoy()
+            }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        (application as FCMCallbackHelper).registerCallback(null)
+        (application as FCMCallbackHelper).registerMessageCallback(null)
     }
 
 }

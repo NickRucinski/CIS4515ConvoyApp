@@ -17,7 +17,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import org.json.JSONObject
 
-class DashboardFragment : Fragment(), FCMCallbackHelper.FCMCallback {
+class DashboardFragment : Fragment(){
 
     private val AnimOpen: Animation by lazy { AnimationUtils.loadAnimation(context, R.anim.open) }
     private val AnimClose: Animation by lazy { AnimationUtils.loadAnimation(context, R.anim.close) }
@@ -91,6 +91,21 @@ class DashboardFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
         joinFAB.setOnClickListener {
             (activity as DashboardInterface).joinConvoy()
+        }
+        joinFAB.setOnLongClickListener {
+            Helper.api.queryStatus(requireContext(),
+                Helper.user.get(requireContext()),
+                Helper.user.getSessionKey(requireContext())!!
+            ) { response ->
+                Helper.api.leaveConvoy(
+                    requireContext(),
+                    Helper.user.get(requireContext()),
+                    Helper.user.getSessionKey(requireContext())!!,
+                    response.getString("convoy_id"),
+                    null
+                )
+            }
+            true
         }
 
         fab.setOnClickListener{
@@ -181,11 +196,6 @@ class DashboardFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-    }
-
-    override fun messageReceived(message: JSONObject) {
-        Log.d("Got a message", message.toString())
-
     }
 
 }
