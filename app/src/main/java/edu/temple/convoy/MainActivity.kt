@@ -217,6 +217,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
 
     override fun logout() {
         Helper.user.clearSessionData(this)
+        convoyViewModel.setConvoyId("")
         Navigation.findNavController(findViewById(R.id.fragmentContainerView))
             .navigate(R.id.action_dashboardFragment_to_loginFragment)
     }

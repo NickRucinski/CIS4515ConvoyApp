@@ -26,7 +26,7 @@ import org.json.JSONObject
 
 class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
 
-    lateinit var map: GoogleMap
+    private var map: GoogleMap? = null
     private var myMarker: Marker? = null
     private var currentMarkers = mutableListOf<Marker?>()
 
@@ -60,14 +60,14 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
             .observe(requireActivity()) {
                 if(map != null){
                     if (myMarker == null) {
-                        myMarker = map.addMarker(
+                        myMarker = map?.addMarker(
                             MarkerOptions().position(it)
                         )
                     } else {
                         myMarker?.setPosition(it)
                     }
                     if(currentMarkers.isEmpty()){
-                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 17f))
+                        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 17f))
                     }
                 }
             }
@@ -108,7 +108,7 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
                             groupMember.getString("latitude").toDouble(),
                             groupMember.getString("longitude").toDouble()
                         )
-                    val marker = map.addMarker(
+                    val marker = map?.addMarker(
                         MarkerOptions()
                             .position(memberLatLng)
                             .title(groupMember.getString("username"))
@@ -132,7 +132,7 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
                     boundsBuilder.include(marker!!.position)
                 }
                 boundsBuilder.include(myMarker!!.position)
-                map.animateCamera(
+                map?.animateCamera(
                     CameraUpdateFactory
                         .newLatLngBounds(boundsBuilder.build(), 200, 200, 0)
                 )

@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import org.json.JSONObject
 
@@ -69,7 +70,16 @@ class LoginFragment : Fragment() {
         // If we're already signed in (saved session key)
         // then go straight to Dashboard
         Helper.user.getSessionKey(requireContext())?.run {
-            goToDashboard()
+            Helper.api.queryStatus(requireContext(),
+                Helper.user.get(requireContext()),
+                Helper.user.getSessionKey(requireContext())!!
+            ) { response ->
+                if (Helper.api.isSuccess(response)){
+                    ViewModelProvider(requireActivity())[ConvoyViewModel::class.java]
+                        .setConvoyId(response.getString("convoy_id"))
+                }
+                goToDashboard()
+            }
         }
     }
 
