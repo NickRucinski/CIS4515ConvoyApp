@@ -51,14 +51,15 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
+        val viewModel = ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java)
 
 
         // Update location on map whenever ViewModel is updated
-        ViewModelProvider(requireActivity())
-            .get(ConvoyViewModel::class.java)
+
+            viewModel
             .getLocation()
             .observe(requireActivity()) {
-                if(map != null){
+                //if(map != null){
                     if (myMarker == null) {
                         myMarker = map?.addMarker(
                             MarkerOptions().position(it)
@@ -69,18 +70,18 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
                     if(currentMarkers.isEmpty()){
                         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(it, 17f))
                     }
-                }
+                //}
             }
 
-        ViewModelProvider(requireActivity())
-            .get(ConvoyViewModel::class.java)
-            .getUserJoinedConvoy()
+        viewModel
+            .getConvoyState()
             .observe(requireActivity()){
-                if(it == null){
+                if(it == false){
                     for(m in currentMarkers){
                         m?.remove()
                     }
                     myMarker?.remove()
+                    myMarker = null
                 }
             }
     }
@@ -134,7 +135,7 @@ class MapsFragment : Fragment(), FCMCallbackHelper.FCMCallback {
                 boundsBuilder.include(myMarker!!.position)
                 map?.animateCamera(
                     CameraUpdateFactory
-                        .newLatLngBounds(boundsBuilder.build(), 200, 200, 0)
+                        .newLatLngBounds(boundsBuilder.build(), 20, 20, 0)
                 )
             }
         }

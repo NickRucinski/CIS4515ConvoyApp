@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
             if (Helper.api.isSuccess(response)) {
                 convoyViewModel.setConvoyId(response.getString("convoy_id"))
                 convoyViewModel.setUserJoinedConvoy(false)
+                convoyViewModel.setConvoyState(true)
                 Helper.user.saveConvoyId(this@MainActivity, convoyViewModel.getConvoyId().value!!)
                 Helper.user.saveJoinedState(this@MainActivity, false)
                 startLocationService()
@@ -128,6 +129,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                 if (Helper.api.isSuccess(response)) {
                     convoyViewModel.setConvoyId(editText.text.toString())
                     convoyViewModel.setUserJoinedConvoy(true)
+                    convoyViewModel.setConvoyState(true)
                     Helper.user.saveConvoyId(this@MainActivity, convoyViewModel.getConvoyId().value!!)
                     Helper.user.saveJoinedState(this@MainActivity, false)
                     startLocationService()
@@ -164,6 +166,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                 if (Helper.api.isSuccess(response)) {
                     convoyViewModel.setConvoyId("")
                     convoyViewModel.setUserJoinedConvoy(null)
+                    convoyViewModel.setConvoyState(false)
                     Helper.user.clearConvoyId(this@MainActivity)
                     Helper.user.clearJoinedState(this@MainActivity)
                     stopLocationService()
@@ -199,6 +202,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                 if (Helper.api.isSuccess(response)) {
                     convoyViewModel.setConvoyId("")
                     convoyViewModel.setUserJoinedConvoy(null)
+                    convoyViewModel.setConvoyState(false)
                     Helper.user.clearConvoyId(this@MainActivity)
                     Helper.user.clearJoinedState(this@MainActivity)
 

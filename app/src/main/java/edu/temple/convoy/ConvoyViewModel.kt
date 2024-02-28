@@ -9,6 +9,9 @@ import com.google.android.gms.maps.model.LatLng
 // A single View Model is used to store all data we want to retain
 // and observe
 class ConvoyViewModel : ViewModel() {
+    private val convoyState by lazy{
+        MutableLiveData<Boolean>()
+    }
     private val location by lazy {
         MutableLiveData<LatLng>()
     }
@@ -46,14 +49,10 @@ class ConvoyViewModel : ViewModel() {
         return userJoinedConvoy
     }
 
-    fun getConvoyState(): MutableLiveData<ConvoyState>{
-        return MutableLiveData<ConvoyState>().apply {
-            value = ConvoyState(convoyId, userJoinedConvoy)
-        }
+    fun getConvoyState(): LiveData<Boolean>{
+        return convoyState
+    }
+    fun setConvoyState(newState: Boolean){
+        convoyState.value = newState
     }
 }
-
-data class ConvoyState(
-    var convoyID: MutableLiveData<String>,
-    var joinedConvoy: MutableLiveData<Boolean?>
-)
