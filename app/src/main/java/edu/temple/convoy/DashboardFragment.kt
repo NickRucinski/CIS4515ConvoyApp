@@ -26,6 +26,7 @@ class DashboardFragment : Fragment(){
     lateinit var fab: FloatingActionButton
     lateinit var menuFAB: FloatingActionButton
     lateinit var joinFAB: FloatingActionButton
+    lateinit var recordAudioFAB: FloatingActionButton
 
     private var clicked = true
 
@@ -64,6 +65,7 @@ class DashboardFragment : Fragment(){
         fab = layout.findViewById(R.id.startFloatingActionButton)
         joinFAB = layout.findViewById(R.id.joinFloatingActionButton)
         menuFAB = layout.findViewById(R.id.menuFloatingActionButton)
+        recordAudioFAB = layout.findViewById(R.id.recordAudioButton)
 
         // Query the server for the current Convoy ID (if available)
         // and use it to close the convoy

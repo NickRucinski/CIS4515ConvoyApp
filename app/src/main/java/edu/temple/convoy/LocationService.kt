@@ -43,6 +43,7 @@ class LocationService : Service() {
 
         // Fetch location manager and define location listener to report
         // user location updates to connected client
+        // This is slow use a fused provider to get faster data but less accurate.
         locationManager = getSystemService(LocationManager::class.java)
         locationListener = LocationListener { location: Location ->
             if (handler != null) {
