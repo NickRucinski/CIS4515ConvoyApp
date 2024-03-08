@@ -29,6 +29,7 @@ class DashboardFragment : Fragment(){
     lateinit var recordAudioFAB: FloatingActionButton
 
     private var clicked = true
+    private var canRecord = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +67,8 @@ class DashboardFragment : Fragment(){
         joinFAB = layout.findViewById(R.id.joinFloatingActionButton)
         menuFAB = layout.findViewById(R.id.menuFloatingActionButton)
         recordAudioFAB = layout.findViewById(R.id.recordAudioButton)
+        //When not in a convoy it is invisible
+        recordAudioFAB.visibility = View.INVISIBLE
 
         // Query the server for the current Convoy ID (if available)
         // and use it to close the convoy
@@ -93,6 +96,7 @@ class DashboardFragment : Fragment(){
 
         joinFAB.setOnClickListener {
             (activity as DashboardInterface).joinConvoy()
+            recordAudioFAB.visibility = View.VISIBLE
         }
         joinFAB.setOnLongClickListener {
             Helper.api.queryStatus(requireContext(),
@@ -114,6 +118,18 @@ class DashboardFragment : Fragment(){
             (activity as DashboardInterface).createConvoy()
         }
 
+        recordAudioFAB.setOnClickListener {
+            //Probably not the best
+            if(!canRecord){
+                setButtonRed(recordAudioFAB, R.drawable.mic_off_24px)
+            } else{
+                setButtonGreen(recordAudioFAB, R.drawable.mic_24px)
+            }
+
+            canRecord = !canRecord
+
+        }
+
         return layout
     }
 
@@ -127,12 +143,15 @@ class DashboardFragment : Fragment(){
         val viewmodel = ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java)
         viewmodel.getUserJoinedConvoy().observe(requireActivity()) { joinedConvoy ->
             if(joinedConvoy == false){
-                setButtonRed(fab){(activity as DashboardInterface).endConvoy()}
+                setButtonRed(fab, android.R.drawable.ic_menu_close_clear_cancel){(activity as DashboardInterface).endConvoy()}
+                recordAudioFAB.visibility = View.VISIBLE
             } else if(joinedConvoy == true){
-                setButtonRed(joinFAB){(activity as DashboardInterface).leaveConvoy()}
+                setButtonRed(joinFAB, android.R.drawable.ic_menu_close_clear_cancel){(activity as DashboardInterface).leaveConvoy()}
+                recordAudioFAB.visibility = View.VISIBLE
             } else{
                 setButtonGreen(fab, android.R.drawable.ic_input_add){(activity as DashboardInterface).createConvoy()}
                 setButtonGreen(joinFAB, R.drawable.join_24px){(activity as DashboardInterface).joinConvoy()}
+                recordAudioFAB.visibility = View.INVISIBLE
             }
         }
     }
@@ -181,9 +200,19 @@ class DashboardFragment : Fragment(){
         fab.setOnClickListener(action)
     }
 
-    private fun setButtonRed(fab: FloatingActionButton, action: OnClickListener){
+    private fun setButtonRed(fab: FloatingActionButton, resID: Int){
         fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
-        fab.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+        fab.setImageResource(resID)
+    }
+
+    private fun setButtonGreen(fab: FloatingActionButton, resID: Int){
+        fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
+        fab.setImageResource(resID)
+    }
+
+    private fun setButtonRed(fab: FloatingActionButton, resID: Int, action: OnClickListener){
+        fab.backgroundTintList  = ColorStateList.valueOf(Color.parseColor("#e91e63"))
+        fab.setImageResource(resID)
         fab.setOnClickListener(action)
     }
 

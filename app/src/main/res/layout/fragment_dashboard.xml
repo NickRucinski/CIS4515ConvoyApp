@@ -60,7 +60,7 @@
         android:clickable="true"
         android:scaleType="center"
         android:scaleX="1"
-        android:src="@android:drawable/ic_btn_speak_now"
+        android:src="@drawable/mic_24px"
         app:fabCustomSize="100dp"
         app:fabSize="auto"
         app:layout_constraintBottom_toBottomOf="parent"
