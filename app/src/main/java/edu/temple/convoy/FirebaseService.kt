@@ -37,10 +37,14 @@ class FirebaseService : FirebaseMessagingService(){
         (application as FCMCallbackHelper).getMapCallbackInternal()?.run {
             messageReceived(myMessage)
         }
+        (application as FCMCallbackHelper).getAudioCallbackInternal()?.run {
+            messageReceived(myMessage)
+        }
     }
 }
 
 class FCMCallbackHelper : Application() {
+    var audioCallback: FCMCallback? = null
     var messCallback: FCMCallback? = null
     var mapCallback: FCMCallback? = null
 
@@ -62,5 +66,13 @@ class FCMCallbackHelper : Application() {
 
     fun getMapCallbackInternal(): FCMCallback?{
         return mapCallback
+    }
+
+    fun registerAudioCallback(callback: FCMCallback?){
+        audioCallback = callback
+    }
+
+    fun getAudioCallbackInternal(): FCMCallback? {
+        return audioCallback
     }
 }
