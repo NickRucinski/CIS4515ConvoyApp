@@ -15,7 +15,7 @@ import java.io.IOException
 import java.net.URL
 import java.time.LocalDateTime
 
-class AudioPlayer(val context: Context): FCMCallbackHelper.FCMCallback {
+class AudioPlayer(val context: Context, val viewModel: ConvoyViewModel): FCMCallbackHelper.FCMCallback {
 
     private var player: MediaPlayer? = null
     fun play(file: File){
@@ -34,9 +34,9 @@ class AudioPlayer(val context: Context): FCMCallbackHelper.FCMCallback {
     override fun messageReceived(message: JSONObject) {
         if(message.getString("action") == "MESSAGE"){
             val link = message.getString("message_file")
-            val audioFile = downloadAudio(link, message.getString("username"))
-            //I think I want to add this to a queue in the view model
-            play(audioFile)
+            val userName = message.getString("username")
+            val audioFile = downloadAudio(link, userName)
+            viewModel.audioQueue.add(AudioMessage(audioFile, userName))
         }
     }
 

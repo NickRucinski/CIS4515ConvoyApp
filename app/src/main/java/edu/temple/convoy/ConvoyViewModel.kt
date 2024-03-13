@@ -5,6 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
+import java.io.File
+import java.util.LinkedList
+import java.util.Queue
 
 // A single View Model is used to store all data we want to retain
 // and observe
@@ -23,6 +26,8 @@ class ConvoyViewModel : ViewModel() {
     private val userJoinedConvoy by lazy {
         MutableLiveData<Boolean?>()
     }
+
+    val audioQueue: Queue<AudioMessage> = LinkedList()
 
     fun setConvoyId(id: String) {
         convoyId.value = id

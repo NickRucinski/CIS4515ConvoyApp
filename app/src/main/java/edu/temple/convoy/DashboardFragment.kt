@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.get
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
@@ -30,6 +31,9 @@ class DashboardFragment : Fragment(){
 
     private var clicked = true
     private var canRecord = false
+
+    lateinit var audioPlayer: AudioPlayer
+    lateinit var audioRecorder: AudioRecorder
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +66,10 @@ class DashboardFragment : Fragment(){
     ): View? {
 
         val layout =  inflater.inflate(R.layout.fragment_dashboard, container, false)
+        val convoyViewModel = ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java)
+        audioPlayer = AudioPlayer(requireContext(), convoyViewModel)
+        audioRecorder = AudioRecorder(requireContext(), convoyViewModel)
+
 
         fab = layout.findViewById(R.id.startFloatingActionButton)
         joinFAB = layout.findViewById(R.id.joinFloatingActionButton)
@@ -119,11 +127,12 @@ class DashboardFragment : Fragment(){
         }
 
         recordAudioFAB.setOnClickListener {
-            //Probably not the best
             if(!canRecord){
                 setButtonRed(recordAudioFAB, R.drawable.mic_off_24px)
+                audioRecorder.start()
             } else{
                 setButtonGreen(recordAudioFAB, R.drawable.mic_24px)
+                audioRecorder.stop()
             }
 
             canRecord = !canRecord

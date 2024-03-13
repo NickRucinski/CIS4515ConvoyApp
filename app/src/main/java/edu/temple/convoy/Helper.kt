@@ -4,10 +4,20 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import com.android.volley.AuthFailureError
+import com.android.volley.NetworkResponse
+import com.android.volley.ParseError
 import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.HttpHeaderParser
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
+import java.io.File
+import java.io.IOException
+import java.io.UnsupportedEncodingException
 
 /**
  * A helper class to store all functions relating to:
@@ -117,6 +127,16 @@ class Helper {
             makeRequest(context, ENDPOINT_CONVOY, params, response)
         }
 
+        fun sendAudioMessage(context: Context, user:User, sessionKey: String, convoyId: String, audioFile: File, response: Response?){
+            val params = mutableMapOf(
+                Pair("action", "UPDATE"),
+                Pair("username", user.username),
+                Pair("session_key", sessionKey),
+                Pair("convoy_id", convoyId),
+            )
+            makeMultiPartRequest(context, ENDPOINT_CONVOY, params, audioFile, response)
+        }
+
         private fun makeRequest(context: Context, endPoint: String, params: MutableMap<String, String>, responseCallback: Response?) {
             Volley.newRequestQueue(context)
                 .add(object: StringRequest(Request.Method.POST, API_BASE + endPoint, {
@@ -127,6 +147,18 @@ class Helper {
                             return params;
                     }
                 })
+        }
+
+        private fun makeMultiPartRequest(context: Context, endPoint: String, params: MutableMap<String,String>, file: File, responseCallback: Response?) {
+            Volley.newRequestQueue(context)
+                .add(
+                    MultipartRequest(API_BASE + endPoint, params, file.readBytes(), {
+                        Log.d("Server Response", it)
+                        responseCallback?.processResponse(JSONObject(it))
+                    }, {
+                        Log.d("Multipart error",it.toString())
+                    })
+                )
         }
 
         fun isSuccess(response: JSONObject): Boolean {
@@ -226,4 +258,78 @@ class Helper {
     }
 
 
+}
+
+class MultipartRequest(
+    url: String,
+    private val params: Map<String, String>?,
+    private val file: ByteArray,
+    private val listener: Response.Listener<String>,
+    private val errorListener: Response.ErrorListener
+) : Request<String>(Method.POST, url, errorListener) {
+
+    private val boundary = "*****" // You can change this to any random string
+
+    override fun getBodyContentType(): String {
+        return "multipart/form-data; boundary=$boundary"
+    }
+
+    @Throws(AuthFailureError::class)
+    override fun getBody(): ByteArray {
+        val bos = ByteArrayOutputStream()
+        val dos = DataOutputStream(bos)
+
+        try {
+            // Adding parameters
+            params?.let {
+                for ((key, value) in it) {
+                    writeFormField(dos, key, value)
+                }
+            }
+
+            // Adding files
+            writeFilePart(dos, "audioFile", "file.jpg", file)
+
+            // Adding end boundary
+            dos.writeBytes("--$boundary--\r\n")
+
+            return bos.toByteArray()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            try {
+                dos.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        return ByteArray(0)
+    }
+
+    private fun writeFormField(dos: DataOutputStream, fieldName: String, value: String) {
+        dos.writeBytes("--$boundary\r\n")
+        dos.writeBytes("Content-Disposition: form-data; name=\"$fieldName\"\r\n\r\n")
+        dos.writeBytes(value + "\r\n")
+    }
+
+    private fun writeFilePart(dos: DataOutputStream, fieldName: String, fileName: String, data: ByteArray) {
+        dos.writeBytes("--$boundary\r\n")
+        dos.writeBytes("Content-Disposition: form-data; name=\"$fieldName\"; filename=\"$fileName\"\r\n")
+        dos.writeBytes("Content-Type: application/octet-stream\r\n\r\n")
+        dos.write(data)
+        dos.writeBytes("\r\n")
+    }
+
+    override fun parseNetworkResponse(response: NetworkResponse): Response<String> {
+        return try {
+            val data = String(response.data, charset(HttpHeaderParser.parseCharset(response.headers)))
+            Response.success(data, HttpHeaderParser.parseCacheHeaders(response))
+        } catch (e: UnsupportedEncodingException) {
+            Response.error(ParseError(e))
+        }
+    }
+
+    override fun deliverResponse(response: String) {
+        listener.onResponse(response)
+    }
 }
