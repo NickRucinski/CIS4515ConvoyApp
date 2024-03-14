@@ -129,7 +129,7 @@ class Helper {
 
         fun sendAudioMessage(context: Context, user:User, sessionKey: String, convoyId: String, audioFile: File, response: Response?){
             val params = mutableMapOf(
-                Pair("action", "UPDATE"),
+                Pair("action", "MESSAGE"),
                 Pair("username", user.username),
                 Pair("session_key", sessionKey),
                 Pair("convoy_id", convoyId),
@@ -288,7 +288,7 @@ class MultipartRequest(
             }
 
             // Adding files
-            writeFilePart(dos, "audioFile", "file.jpg", file)
+            writeFilePart(dos, "audioFile", file)
 
             // Adding end boundary
             dos.writeBytes("--$boundary--\r\n")
@@ -312,7 +312,8 @@ class MultipartRequest(
         dos.writeBytes(value + "\r\n")
     }
 
-    private fun writeFilePart(dos: DataOutputStream, fieldName: String, fileName: String, data: ByteArray) {
+    private fun writeFilePart(dos: DataOutputStream, fileName: String, data: ByteArray) {
+        val fieldName = "message_file"
         dos.writeBytes("--$boundary\r\n")
         dos.writeBytes("Content-Disposition: form-data; name=\"$fieldName\"; filename=\"$fileName\"\r\n")
         dos.writeBytes("Content-Type: application/octet-stream\r\n\r\n")

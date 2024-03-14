@@ -8,6 +8,7 @@ import android.view.*
 import android.view.View.OnClickListener
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -28,6 +29,7 @@ class DashboardFragment : Fragment(){
     lateinit var menuFAB: FloatingActionButton
     lateinit var joinFAB: FloatingActionButton
     lateinit var recordAudioFAB: FloatingActionButton
+    lateinit var audioText: TextView
 
     private var clicked = true
     private var canRecord = false
@@ -66,9 +68,7 @@ class DashboardFragment : Fragment(){
     ): View? {
 
         val layout =  inflater.inflate(R.layout.fragment_dashboard, container, false)
-        val convoyViewModel = ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java)
-        audioPlayer = AudioPlayer(requireContext(), convoyViewModel)
-        audioRecorder = AudioRecorder(requireContext(), convoyViewModel)
+        audioText = layout.findViewById(R.id.audioDisplay)
 
 
         fab = layout.findViewById(R.id.startFloatingActionButton)
@@ -149,8 +149,10 @@ class DashboardFragment : Fragment(){
         // Use ViewModel to determine if we're in an active Convoy
         // Change FloatingActionButton behavior depending on if we're
         // currently in a convoy
-        val viewmodel = ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java)
-        viewmodel.getUserJoinedConvoy().observe(requireActivity()) { joinedConvoy ->
+        val viewModel = ViewModelProvider(requireActivity()).get(ConvoyViewModel::class.java)
+        audioPlayer = AudioPlayer(requireContext(), viewModel)
+        audioRecorder = AudioRecorder(requireContext(), requireActivity(), viewModel)
+        viewModel.getUserJoinedConvoy().observe(viewLifecycleOwner) { joinedConvoy ->
             if(joinedConvoy == false){
                 setButtonRed(fab, android.R.drawable.ic_menu_close_clear_cancel){(activity as DashboardInterface).endConvoy()}
                 recordAudioFAB.visibility = View.VISIBLE
@@ -161,6 +163,16 @@ class DashboardFragment : Fragment(){
                 setButtonGreen(fab, android.R.drawable.ic_input_add){(activity as DashboardInterface).createConvoy()}
                 setButtonGreen(joinFAB, R.drawable.join_24px){(activity as DashboardInterface).joinConvoy()}
                 recordAudioFAB.visibility = View.INVISIBLE
+            }
+        }
+
+        viewModel.getAudioPlaying().observe(viewLifecycleOwner){
+            if(it){
+                audioText.visibility = View.VISIBLE
+                audioText.text = "Audio Message From ${viewModel.audioQueue.peek()?.userName}:"
+            } else{
+                audioText.visibility = View.INVISIBLE
+                audioText.text = ""
             }
         }
     }

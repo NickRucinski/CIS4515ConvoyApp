@@ -43,6 +43,7 @@ class FirebaseService : FirebaseMessagingService(){
     }
 }
 
+//All of this should be done in a view model. Look into that
 class FCMCallbackHelper : Application() {
     var audioCallback: FCMCallback? = null
     var messCallback: FCMCallback? = null

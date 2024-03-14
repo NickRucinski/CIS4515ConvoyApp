@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.File
@@ -21,22 +22,27 @@ class AudioPlayer(val context: Context, val viewModel: ConvoyViewModel): FCMCall
     fun play(file: File){
         MediaPlayer.create(context, file.toUri()).apply{
             player = this
+            setOnCompletionListener {
+                //Stops the player when its done
+                stop()
+                release()
+                player = null
+                //set viewmodel flag to say another file can be played
+                viewModel.setAudioPlaying(false)
+            }
             start()
+            viewModel.setAudioPlaying(true)
         }
-    }
-
-    fun stop(){
-        player?.stop()
-        player?.release()
-        player = null
     }
 
     override fun messageReceived(message: JSONObject) {
         if(message.getString("action") == "MESSAGE"){
             val link = message.getString("message_file")
             val userName = message.getString("username")
+            //add a check for username to make sure you are not playing your own audio
             val audioFile = downloadAudio(link, userName)
             viewModel.audioQueue.add(AudioMessage(audioFile, userName))
+            Log.d("AudioMessage", message.toString())
         }
     }
 

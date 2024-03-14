@@ -29,6 +29,10 @@ class ConvoyViewModel : ViewModel() {
 
     val audioQueue: Queue<AudioMessage> = LinkedList()
 
+    private val isAudioPlaying by lazy{
+        MutableLiveData<Boolean>()
+    }
+
     fun setConvoyId(id: String) {
         convoyId.value = id
     }
@@ -59,5 +63,13 @@ class ConvoyViewModel : ViewModel() {
     }
     fun setConvoyState(newState: Boolean){
         convoyState.value = newState
+    }
+
+    fun setAudioPlaying(isPlaying: Boolean){
+        isAudioPlaying.value = isPlaying
+    }
+
+    fun getAudioPlaying(): LiveData<Boolean>{
+        return isAudioPlaying
     }
 }
