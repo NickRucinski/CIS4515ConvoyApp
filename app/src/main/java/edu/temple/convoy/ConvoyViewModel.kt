@@ -27,7 +27,11 @@ class ConvoyViewModel : ViewModel() {
         MutableLiveData<Boolean?>()
     }
 
-    val audioQueue: Queue<AudioMessage> = LinkedList()
+    private val audioQueue: Queue<AudioMessage> = LinkedList()
+
+    private val isAudioAvailable by lazy{
+        MutableLiveData<Boolean>()
+    }
 
     private val isAudioPlaying by lazy{
         MutableLiveData<Boolean>()
@@ -71,5 +75,26 @@ class ConvoyViewModel : ViewModel() {
 
     fun getAudioPlaying(): LiveData<Boolean>{
         return isAudioPlaying
+    }
+
+    fun addToAudioQueue(message: AudioMessage){
+        Log.d("AudioQueue","Added $message to the queue")
+        audioQueue.add(message)
+        isAudioAvailable.value = true
+    }
+    fun removeFromAudioQueue(): AudioMessage{
+        val nextMessage = audioQueue.remove()
+        if(audioQueue.size == 1) {
+            isAudioAvailable.value = false
+        }
+        return nextMessage
+    }
+
+    fun peekAudioQueue(): AudioMessage?{
+        return audioQueue.peek()
+    }
+
+    fun getIsAudioAvailable(): LiveData<Boolean>{
+        return isAudioAvailable
     }
 }

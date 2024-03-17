@@ -11,13 +11,21 @@ import android.view.animation.AnimationUtils
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.get
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import org.json.JSONObject
+import java.io.File
 
 class DashboardFragment : Fragment(){
 
@@ -169,12 +177,21 @@ class DashboardFragment : Fragment(){
         viewModel.getAudioPlaying().observe(viewLifecycleOwner){
             if(it){
                 audioText.visibility = View.VISIBLE
-                audioText.text = "Audio Message From ${viewModel.audioQueue.peek()?.userName}:"
+                audioText.text = "Audio Message From ${viewModel.peekAudioQueue()?.userName}:"
             } else{
                 audioText.visibility = View.INVISIBLE
                 audioText.text = ""
             }
         }
+
+        viewModel.getIsAudioAvailable().observe(requireActivity()){
+            if(it){
+                val message = viewModel.peekAudioQueue()
+                audioPlayer.play(message?.uri!!.toUri())
+            }
+        }
+
+
     }
 
     // This fragment places a menu item in the app bar

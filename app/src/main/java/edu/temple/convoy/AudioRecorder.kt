@@ -16,7 +16,7 @@ import java.io.FileOutputStream
 
 class AudioRecorder(val context: Context, val activity: Activity, val viewModel: ConvoyViewModel) {
     private var recorder: MediaRecorder? = null
-    private val file: File = File(context.filesDir, "RecordingFile")
+    private val file: File = File(context.filesDir, "RecordingFile.mp3")
     private fun create(): MediaRecorder{
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaRecorder(context)
@@ -51,7 +51,7 @@ class AudioRecorder(val context: Context, val activity: Activity, val viewModel:
 
     }
 
-    fun stop(){
+    fun stop(): File{
         recorder?.stop()
         recorder?.reset()
         recorder = null
@@ -59,5 +59,6 @@ class AudioRecorder(val context: Context, val activity: Activity, val viewModel:
         Helper.api.sendAudioMessage(context, Helper.user.get(context), Helper.user.getSessionKey(context)!!, viewModel.getConvoyId().value!!, file){
             Log.d("Audio Sent", "")
         }
+        return file
     }
 }

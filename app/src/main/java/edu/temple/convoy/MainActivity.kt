@@ -4,12 +4,14 @@ import android.Manifest
 import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.*
-import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -47,6 +49,11 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val filter = IntentFilter("DOWNLOAD_COMPLETED")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(downloadCompleteReceiver, filter, RECEIVER_NOT_EXPORTED)
+        }
+
         FirebaseApp.initializeApp(this)
         (application as FCMCallbackHelper).registerMessageCallback(this)
         createNotificationChannel()
@@ -78,6 +85,12 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
             ) != PackageManager.PERMISSION_GRANTED &&
             checkSelfPermission(
                 Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(
+                Manifest.permission.READ_EXTERNAL_STORAGE
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissions(
@@ -85,7 +98,9 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.POST_NOTIFICATIONS,
-                    Manifest.permission.RECORD_AUDIO
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
                 ), 1
             )
         }
@@ -240,7 +255,6 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
     }
 
     override fun messageReceived(message: JSONObject) {
-        Log.d("MainActivity Message Receiver", message.toString())
         if(message.getString("action") == "END" && convoyViewModel.getUserJoinedConvoy().value == true){
             runOnUiThread {
                 convoyViewModel.setConvoyId("")
@@ -250,12 +264,29 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                 Helper.user.clearJoinedState(this@MainActivity)
                 stopLocationService()
             }
+        } else if(message.getString("action") == "MESSAGE"){
+            val link = message.getString("message_file")
+            val userName = message.getString("username")
+            //add a check for username to make sure you are not playing your own audio
+            val audioDownloader = AudioDownloader(this)
+            audioDownloader.downloadFile(link)
+        }
+    }
+
+    private val downloadCompleteReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "DOWNLOAD_COMPLETED") {
+                val downloadedUri = intent.getStringExtra("downloadedUri")
+                // Update ViewModel with downloadedUri
+                convoyViewModel.addToAudioQueue(AudioMessage(downloadedUri, ""))
+            }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         (application as FCMCallbackHelper).registerMessageCallback(null)
+        unregisterReceiver(downloadCompleteReceiver)
     }
 
 }
