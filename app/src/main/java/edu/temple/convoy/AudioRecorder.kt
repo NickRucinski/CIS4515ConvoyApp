@@ -16,7 +16,7 @@ import java.io.FileOutputStream
 
 class AudioRecorder(val context: Context, val activity: Activity, val viewModel: ConvoyViewModel) {
     private var recorder: MediaRecorder? = null
-    private val file: File = File(context.filesDir, "RecordingFile.mp3")
+    private val file: File = File(context.filesDir, "RecordingFile.mp4")
     private fun create(): MediaRecorder{
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaRecorder(context)

@@ -14,6 +14,10 @@ class AudioPlayer(val context: Context, val viewModel: ConvoyViewModel) {
             player = this
             start()
             Log.d("AudioPlayer", "Playing $uri")
+            viewModel.setAudioPlaying(true)
+        }
+        player?.setOnCompletionListener {
+            stop()
         }
     }
 

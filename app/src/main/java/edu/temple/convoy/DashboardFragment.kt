@@ -186,8 +186,8 @@ class DashboardFragment : Fragment(){
 
         viewModel.getIsAudioAvailable().observe(requireActivity()){
             if(it){
-                val message = viewModel.peekAudioQueue()
-                audioPlayer.play(message?.uri!!.toUri())
+                val message = viewModel.removeFromAudioQueue()
+                audioPlayer.play(message.uri!!.toUri())
             }
         }
 

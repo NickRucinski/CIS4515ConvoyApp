@@ -253,7 +253,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
         unbindService(serviceConnection)
         stopService(serviceIntent)
     }
-
+    var userName: String = ""
     override fun messageReceived(message: JSONObject) {
         if(message.getString("action") == "END" && convoyViewModel.getUserJoinedConvoy().value == true){
             runOnUiThread {
@@ -266,7 +266,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
             }
         } else if(message.getString("action") == "MESSAGE"){
             val link = message.getString("message_file")
-            val userName = message.getString("username")
+            userName = message.getString("username")
             //add a check for username to make sure you are not playing your own audio
             val audioDownloader = AudioDownloader(this)
             audioDownloader.downloadFile(link)
@@ -278,7 +278,7 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
             if (intent?.action == "DOWNLOAD_COMPLETED") {
                 val downloadedUri = intent.getStringExtra("downloadedUri")
                 // Update ViewModel with downloadedUri
-                convoyViewModel.addToAudioQueue(AudioMessage(downloadedUri, ""))
+                convoyViewModel.addToAudioQueue(AudioMessage(downloadedUri, userName))
             }
         }
     }

@@ -31,7 +31,7 @@ class AudioDownloader(private val context: Context) {
 
             val mimeType = urlConnection.contentType
             val fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
-            val fileName = "downloaded_audio.${fileExtension ?: "mp3"}"
+            val fileName = "downloaded_audio.mp4"
 
             file = File(context.cacheDir, fileName)
             outputStream = FileOutputStream(file)
