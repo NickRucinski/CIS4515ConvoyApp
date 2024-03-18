@@ -265,11 +265,14 @@ class MainActivity : AppCompatActivity(), DashboardFragment.DashboardInterface, 
                 stopLocationService()
             }
         } else if(message.getString("action") == "MESSAGE"){
-            val link = message.getString("message_file")
-            userName = message.getString("username")
-            //add a check for username to make sure you are not playing your own audio
-            val audioDownloader = AudioDownloader(this)
-            audioDownloader.downloadFile(link)
+            if(message.getString("username") != Helper.user.get(this).username){
+                val link = message.getString("message_file")
+                userName = message.getString("username")
+                //add a check for username to make sure you are not playing your own audio
+                val audioDownloader = AudioDownloader(this)
+                audioDownloader.downloadFile(link)
+            }
+
         }
     }
 
